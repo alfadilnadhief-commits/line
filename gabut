@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flowers For You?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background: #f7b6c5;
+  overflow: hidden;
+}
+.container { text-align: center; }
+.card {
+  background: white;
+  padding: 12px;
+  border-radius: 3px;
+  width: 190px;
+  margin: auto;
+  box-shadow: 0 6px 18px rgba(0,0,0,.15);
+}
+.bear {
+  width: 160px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 86px;
+  line-height: 1;
+  margin: auto;
+}
+h2 { font-size: 18px; margin: 10px 0; color: #222; }
+button {
+  border: none;
+  color: white;
+  padding: 7px 15px;
+  font-weight: bold;
+  border-radius: 2px;
+  cursor: pointer;
+  margin: 3px;
+  font-size: 14px;
+}
+#yes { background: #08a51c; }
+#no { background: #e52525; position: relative; }
+
+/* Rose screen */
+#flowerScreen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #080d15;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.glass {
+  position: relative;
+  width: 170px;
+  height: 300px;
+  border: 3px solid rgba(190, 200, 215, 0.7);
+  border-radius: 80px 80px 10px 10px;
+  background: rgba(30, 60, 100, 0.25);
+  box-shadow: 0 0 20px rgba(100, 150, 255, 0.3), inset 0 0 30px rgba(100, 150, 255, 0.15);
+}
+.rose {
+  position: absolute;
+  left: 50%;
+  top: 100px;
+  width: 0;
+  transform-origin: bottom center;
+  animation: sway 5s ease-in-out infinite;
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+/* Titik pusat bunga: kelopak berputar dari sini */
+.flower {
+  position: relative;
+  width: 0;
+  height: 0;
+}
+/* Glow statis (opacity saja) supaya ringan, tidak pakai filter animasi */
+.flower::before {
+  content: "";
+  position: absolute;
+  left: -70px;
+  top: -100px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 23, 79, .5), transparent 65%);
+  animation: glowIn 3s ease-out 1.2s both;
+  pointer-events: none;
+}
+@keyframes glowIn { from { opacity: 0; } to { opacity: 1; } }
+.petal {
+  position: absolute;
+  left: -16px;
+  top: -42px;
+  width: 32px;
+  height: 42px;
+  border-radius: 50% 50% 40% 40% / 75% 75% 25% 25%;
+  background: radial-gradient(ellipse at 50% 85%, rgba(0,0,0,.35), transparent 60%), var(--c);
+  transform-origin: 50% 100%;
+  transform: rotate(var(--a)) scale(var(--s));
+  animation: bloom 2s cubic-bezier(.2, .8, .3, 1) both;
+  animation-delay: var(--d);
+  will-change: transform;
+}
+@keyframes bloom {
+  from { transform: rotate(var(--a0)) scale(var(--s0)); }
+  to   { transform: rotate(var(--a)) scale(var(--s)); }
+}
+.core {
+  position: absolute;
+  left: -9px;
+  top: -16px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #ff7a9a, #a30d2f);
+  z-index: 10;
+  animation: coreIn 2s ease-out 2.4s both;
+}
+@keyframes coreIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+.stem {
+  width: 5px;
+  height: 170px;
+  margin-left: -2.5px;
+  background: linear-gradient(#1f8f3a, #145c27);
+  border-radius: 3px;
+  position: relative;
+  transform-origin: top center;
+  animation: stemGrow 1.4s ease-out both;
+}
+@keyframes stemGrow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+.leaf {
+  position: absolute;
+  width: 32px;
+  height: 17px;
+  background: #1f8f3a;
+  border-radius: 0 100% 0 100%;
+  animation: leafIn 1s ease-out 1.2s both;
+}
+.leaf.l { left: -30px; top: 70px; transform: rotate(-20deg) scaleX(-1); }
+.leaf.r { left: 4px; top: 105px; transform: rotate(20deg); }
+@keyframes leafIn { from { opacity: 0; } to { opacity: 1; } }
+
+.falling {
+  position: absolute;
+  width: 10px;
+  height: 13px;
+  background: #ff3c6a;
+  border-radius: 50% 50% 45% 45%;
+  opacity: 0;
+  animation: fall 6s linear infinite;
+}
+@keyframes fall {
+  0%   { transform: translateY(0) rotate(0); opacity: 0; }
+  10%  { opacity: .9; }
+  100% { transform: translateY(190px) translateX(25px) rotate(300deg); opacity: 0; }
+}
+.msg {
+  color: #ffd1dc;
+  margin-top: 28px;
+  font-size: 20px;
+  text-align: center;
+}
+.msg small { display: block; margin-top: 6px; opacity: .6; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="container" id="main">
+  <div class="card">
+    <div class="bear">🐻</div>
+    <h2>Flowers for you?</h2>
+    <button id="yes">Yes</button>
+    <button id="no">No</button>
+  </div>
+</div>
+
+<div id="flowerScreen">
+  <div class="glass" id="glass">
+    <div class="rose">
+      <div class="flower" id="flower"></div>
+      <div class="stem">
+        <div class="leaf l"></div>
+        <div class="leaf r"></div>
+      </div>
+    </div>
+  </div>
+  <div class="msg">🌹 A rose for you 🌹<small>Hope it makes your day a little brighter</small></div>
+</div>
+
+<script>
+const yes = document.getElementById('yes');
+const no = document.getElementById('no');
+const main = document.getElementById('main');
+const screen = document.getElementById('flowerScreen');
+const glass = document.getElementById('glass');
+const flower = document.getElementById('flower');
+
+// Tombol "No" kabur
+function dodge() {
+  const x = (Math.random() - 0.5) * 240;
+  const y = (Math.random() - 0.5) * 240;
+  no.style.transform = `translate(${x}px, ${y}px)`;
+}
+no.addEventListener('mouseover', dodge);
+no.addEventListener('touchstart', (e) => { e.preventDefault(); dodge(); });
+no.addEventListener('click', dodge);
+
+// Lapisan kelopak: dari luar (paling lebar) ke dalam (kuncup)
+const layers = [
+  { angles: [-95, -72, -50, -28, 28, 50, 72, 95], s: 1.15, c: '#9e0d2e', d: 0.0 },
+  { angles: [-78, -55, -33, -11, 11, 33, 55, 78],  s: 1.0,  c: '#c4103a', d: 0.35 },
+  { angles: [-55, -33, -11, 11, 33, 55],           s: 0.85, c: '#e0143f', d: 0.7 },
+  { angles: [-36, -14, 0, 14, 36],                 s: 0.68, c: '#ed1749', d: 1.05 },
+  { angles: [-20, 20, 0],                          s: 0.5,  c: '#ff3c6a', d: 1.4 },
+];
+
+function buildRose() {
+  flower.innerHTML = '';
+  layers.forEach((layer) => {
+    layer.angles.forEach((a, i) => {
+      const p = document.createElement('div');
+      p.className = 'petal';
+      p.style.setProperty('--a', a + 'deg');
+      p.style.setProperty('--a0', (a * 0.08) + 'deg');
+      p.style.setProperty('--s', layer.s);
+      p.style.setProperty('--s0', (layer.s * 0.35).toFixed(3));
+      p.style.setProperty('--c', layer.c);
+      p.style.setProperty('--d', (1.4 + layer.d + i * 0.04) + 's');
+      flower.appendChild(p);
+    });
+  });
+  const core = document.createElement('div');
+  core.className = 'core';
+  flower.appendChild(core);
+}
+
+yes.addEventListener('click', () => {
+  main.style.display = 'none';
+  screen.style.display = 'flex';
+  buildRose();
+  for (let i = 0; i < 6; i++) {
+    const p = document.createElement('div');
+    p.className = 'falling';
+    p.style.left = (20 + Math.random() * 120) + 'px';
+    p.style.top = (80 + Math.random() * 20) + 'px';
+    p.style.animationDelay = (5 + Math.random() * 8) + 's';
+    glass.appendChild(p);
+  }
+});
+</script>
+</body>
+</html>
